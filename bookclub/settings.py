@@ -27,13 +27,10 @@ SECRET_KEY = 'django-insecure-tr&9wvq*y%6ljskhh9dih0nel&^u4xquzwsw+krx#qbftt97_(
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['18.217.183.96']
 
 
 # Application definition
-
-
-
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -68,8 +65,6 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 
-
-    
 ]
 
 ROOT_URLCONF = 'bookclub.urls'
@@ -182,18 +177,3 @@ OPENAI_API_KEY = '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'
 CORS_ORIGIN_ALLOW_ALL = True
 
 
-#AWS CREDENTIALS
-
-AWS_ACCESS_KEY_ID = "AKIAQEBI47J7WN7OH6O4"
-AWS_SECRET_ACCESS_KEY = "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"
-
-#S3 CONFIGURE
-
-AWS_STORAGE_BUCKET_NAME = 'bookclub-bucket'
-
-DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-
-AWS_S3_CUSTOM_DOMAIN = '%s.s3.amazonaws.com' % AWS_STORAGE_BUCKET_NAME
-
-AWS_S3_FILE_OVERWRITE = False
