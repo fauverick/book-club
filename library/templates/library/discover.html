@@ -1,0 +1,177 @@
+{% extends 'library/base.html'%}
+
+{% load static %}
+
+{% block content %}
+
+    <style>
+
+    .loader_container{
+        width: 100%;
+        height: 40vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .loader {
+      border: 16px solid #f3f3f3;
+      border-radius: 50%;
+      border-top: 16px solid blue;
+      border-right: 16px solid green;
+      border-bottom: 16px solid red;
+      border-left: 16px solid pink;
+      width: 120px;
+      height: 120px;
+      -webkit-animation: spin 2s linear infinite;
+      animation: spin 2s linear infinite;
+    }
+    
+    @-webkit-keyframes spin {
+      0% { -webkit-transform: rotate(0deg); }
+      100% { -webkit-transform: rotate(360deg); }
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    #book-row{
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            box-sizing: border-box;
+            margin-bottom: 50px;
+    }
+
+    .card{
+        width: 270px;
+    }
+    .card-body img{
+        width: 100%;
+    }
+    .card-title{
+        font-size: 18px;
+        font-weight: bold;
+        padding-top: 10px;
+    }
+    .card-text{
+    font-size: 16px;
+    }
+    </style>
+    
+    <div class = "container">
+
+    <h2 style = "text-align: center;">Let's venture outside our library!</h2>
+    <br>
+    <div class = "loader_container">
+        <div class="loader">
+        </div>    
+    </div>
+    <h3 style = "text-align: center"> Here are some amazing books for you ... </h3>
+    <br>
+    <br>
+  
+    <div id  = "book_list">
+        <p id = "content">
+
+        </p>
+    </div>
+
+    <div id = "book-row">
+       
+    </div>
+
+    </div>
+
+    <script>
+
+
+        let data = JSON.parse("{{data|escapejs}}")
+        const endpointUrl_Turbo = "https://api.openai.com/v1/chat/completions";
+
+
+
+        async function fetchBookImage(fetch_url, book_data){
+            const response = await fetch(fetch_url)
+            const book = await response.json();
+            cover_id = book.docs[0].cover_i
+            img_url = `https://covers.openlibrary.org/b/id/${cover_id}-M.jpg`
+            document.getElementById("book-row").innerHTML += `
+            <a href = "https://openlibrary.org${book.docs[0].key}" target=”_blank”>
+                <div class="card border-dark mb-3" style="max-width: 20rem; margin-bottom: 20px;">
+                    <div class="card-header">
+                            ${book_data.genre.charAt(0).toUpperCase() + book_data.genre.slice(1)}
+                    </div>
+                    <div class="card-body">
+                        <img src = "${img_url}">
+                        <h4 class="card-title">${book_data.title}</h4>
+                        <p class="card-text">${book_data.author}</p>
+                    </div>
+                </div>
+                <br>
+            </a>
+            `
+        }
+
+        render_book = (books) => {
+            
+            books.forEach(book => {
+                // let html_content = `<p> ${book.title} - ${book.author} - ${book.genre} </p>`
+                // document.getElementById("content").innerHTML += html_content
+                let param = 'title=' + book.title.toLowerCase().split(' ').join('-') + '&author=' + book.author.toLowerCase().split(' ').join('-')
+                let url = 'https://openlibrary.org/search.json?' + param
+                fetchBookImage(url, book)
+
+            });
+
+            $(".loader_container").css("display", "none")
+
+        }
+
+        
+        fetchData = async() => {
+        try {
+        await fetch( endpointUrl_Turbo,
+            {
+                body: JSON.stringify({
+                    "model": "gpt-3.5-turbo-1106",
+                    // "response_format": { type: "json_object" },
+                    "messages": [
+                        {
+                        role: "user",
+                        content: data["prompt"],            
+                        },
+                       
+                    ], 
+                    "temperature": 0,
+                }),
+                method: "POST",
+                headers: {
+                    "content-type": "application/json",
+                    Authorization: "Bearer "+ data["apiKey"],
+                },
+            }
+        ).then((response) => {
+            if (response.ok) {
+                response.json().then((json) => {    
+                    let content = json['choices'][0]['message']['content']
+                    json_data = JSON.parse(content)
+                    render_book(json_data.books)
+                });
+
+            }
+        });
+        } catch (err) { console.error(`Error: ${err}`) }}
+
+      
+
+       fetchData()
+
+       $("#discover-nav").css("color", "#d32521")
+
+    </script>
+
+{% endblock %}
