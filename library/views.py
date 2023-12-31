@@ -262,9 +262,13 @@ def discover(request):
 
     requirement = ". Give answer in form of json with primary field books, each element with fields title, author, genre"
 
-    prompt = "My favorite authors are" + author_prompt + ". My favorite genres are " + genres_prompt + ". Give me 4 book recommendations from 4 other authors" + requirement
+    requirement = ". Give answer in form of book name, author and genre"
+
+    prompt = "My favorite authors are " + author_prompt + ". My favorite genres are " + genres_prompt + ". Give me 4 book recommendations from 4 other authors" + requirement
 
     print("prompt is", prompt)
+
+    new_prompt = "%20".join(prompt.split(" "))
     from openai import OpenAI
     # client = OpenAI()
 
@@ -279,8 +283,10 @@ def discover(request):
     # print(completion.choices[0].message)    
 
     data = {
-        "apiKey": settings.OPENAI_API_KEY, "prompt": prompt
+        "apiKey": settings.OPENAI_API_KEY, "prompt": new_prompt
     }
+
+    print("key is", settings.OPENAI_API_KEY)
 
     dataJSON = dumps(data)
 
