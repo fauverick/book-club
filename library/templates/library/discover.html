@@ -90,7 +90,7 @@
 
 
         let data = JSON.parse("{{data|escapejs}}")
-        const endpointUrl_Turbo = "https://api.openai.com/v1/chat/completions";
+        const ai_url = "https://5au3xnmm4mdtf75zcceujd5oem0sgtxi.lambda-url.us-east-2.on.aws/?prompt=";
 
 
 
@@ -131,45 +131,44 @@
 
         }
 
+
+        let fetchURL = "https://5au3xnmm4mdtf75zcceujd5oem0sgtxi.lambda-url.us-east-2.on.aws/?prompt=" + data["prompt"]
+
+        console.log(fetchURL)
+
+
+        function convert_to_data(text){
+            let book_array = text.split('\n').slice(1)
+            let book_data = []
+            for (let i = 0; i<book_array.length; i++){
+                let text = book_array[i].trim().slice(2)
+                genre = text.split(' - ')[1].split('/')[0]
+                other_info = text.split(' - ')[0].split(' by ')
+                author = other_info[1]
+                title = other_info[0].split('"')[1]
+                
+
+                book_data.push({
+                    "title": title,
+                    "author": author,
+                    "genre": genre
+                })
+            }
+            console.log(book_data)
+            render_book(book_data)
+        }   
+
+
+        async function fetchAWSData(){
+            console.log("fetching aws")
+            const response = await fetch(fetchURL)
+            const books = await response.text();
+            console.log("response is", books)
+            convert_to_data(books)
+        }
+
+        fetchAWSData()
         
-        fetchData = async() => {
-        try {
-        await fetch( endpointUrl_Turbo,
-            {
-                body: JSON.stringify({
-                    "model": "gpt-3.5-turbo-1106",
-                    // "response_format": { type: "json_object" },
-                    "messages": [
-                        {
-                        role: "user",
-                        content: data["prompt"],            
-                        },
-                       
-                    ], 
-                    "temperature": 0,
-                }),
-                method: "POST",
-                headers: {
-                    "content-type": "application/json",
-                    Authorization: "Bearer "+ data["apiKey"],
-                },
-            }
-        ).then((response) => {
-            if (response.ok) {
-                response.json().then((json) => {    
-                    let content = json['choices'][0]['message']['content']
-                    json_data = JSON.parse(content)
-                    render_book(json_data.books)
-                });
-
-            }
-        });
-        } catch (err) { console.error(`Error: ${err}`) }}
-
-      
-
-       fetchData()
-
        $("#discover-nav").css("color", "#d32521")
 
     </script>
